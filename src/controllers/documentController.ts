@@ -8,11 +8,13 @@ import { extractTextFromFile } from '../services/textExtractorService';
 import { generateSummary } from '../services/geminiService';
 import { generateQa } from '../services/geminiService';
 import { generateQuiz } from '../services/geminiService';
+import config from '../config/config';
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    const uploadPath = path.resolve(__dirname, '../../', config.UPLOAD_PATH);
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
@@ -147,7 +149,7 @@ export const processDocumentSummary = async (req: Request, res: Response) => {
     try {
       // Extract text from the document
       const extractedText = await extractTextFromFile(document.storagePath, document.fileType);
-      
+
       if (!extractedText || extractedText.trim() === '') {
         document.status = 'error';
         await document.save();
@@ -156,7 +158,6 @@ export const processDocumentSummary = async (req: Request, res: Response) => {
 
       // Generate summary using Gemini
       const summary = await generateSummary(extractedText);
-      
       // Update document with summary
       document.summary = summary;
       document.status = 'ready';

@@ -1,8 +1,12 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import config from '../config/config';
 
-// Initialize the Google Generative AI client
-const apiKey = process.env.GEMINI_API_KEY || '';
-const genAI = new GoogleGenerativeAI(apiKey);
+console.log('Gemini API Key:', config.GEMINI_API_KEY);
+// Initialize the Gemini API with your API key
+const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+
+// Add logging to debug API key issues
+console.log('Gemini API Key configured:', config.GEMINI_API_KEY ? 'Yes (length: ' + config.GEMINI_API_KEY.length + ')' : 'No');
 
 /**
  * Generate a summary of the provided text using Gemini
@@ -11,19 +15,20 @@ const genAI = new GoogleGenerativeAI(apiKey);
  */
 export const generateSummary = async (text: string): Promise<string> => {
   try {
-    // Get the model
-    const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    if (!config.GEMINI_API_KEY || config.GEMINI_API_KEY.trim() === '') {
+      throw new Error('Gemini API key is not configured');
+    }
     
-    // Generate content
-    const prompt = `Summarize the following text in a concise manner, highlighting the key points and main ideas:
-    
-    ${text}`;
-    
-    const result = await model.generateContent(prompt);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(text);
     const response = await result.response;
     return response.text();
   } catch (error) {
+    console.log(error);
     console.error('Error generating summary:', error);
+    if (error instanceof Error && error.message.includes('API Key')) {
+      throw new Error('Gemini API key configuration error');
+    }
     throw new Error('Failed to generate summary');
   }
 };
@@ -36,7 +41,7 @@ export const generateSummary = async (text: string): Promise<string> => {
 export const generateQa = async (text: string): Promise<Array<{question: string, answer: string}>> => {
   try {
     // Get the model
-    const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     
     // Generate content
     const prompt = `Based on the following text, generate 5 relevant question and answer pairs in JSON format like [{ "question": "...", "answer": "..." }]:
@@ -78,7 +83,7 @@ ${text}`;
 export const generateQuiz = async (text: string): Promise<Array<{question: string, options: string[], correctAnswer: string}>> => {
   try {
     // Get the model
-    const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     
     // Generate content
     const prompt = `Based on the following text, generate 3 multiple-choice quiz questions in JSON format like [{ "question": "...", "options": ["...", "...", "..."], "correctAnswer": "..." }]:
@@ -124,7 +129,7 @@ ${text}`;
 export const getChatResponse = async (prompt: string, context?: string): Promise<string> => {
   try {
     // Get the model
-    const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model: GenerativeModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     
     // Construct the prompt based on whether context is provided
     let fullPrompt: string;

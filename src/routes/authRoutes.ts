@@ -1,13 +1,17 @@
 import express, { Router } from 'express';
 import { registerUser, loginUser } from '../controllers/authController';
-import { registerValidation, loginValidation } from '../middleware/validationMiddleware';
+import { 
+  registerValidationRules, 
+  loginValidationRules, 
+  validateRequest 
+} from '../middleware/validationMiddleware';
 
 const router: Router = express.Router();
 
 // Register user with validation
-router.post('/register', registerValidation, registerUser);
+router.post('/register', registerValidationRules, validateRequest, registerUser);
 
 // Login user with validation
-router.post('/login', loginValidation, loginUser);
+router.post('/login', loginValidationRules, validateRequest, loginUser);
 
 export default router;

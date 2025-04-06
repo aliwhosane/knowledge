@@ -12,19 +12,21 @@ const generateToken = (id: string): string => {
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, email, password } = req.body;
 
     // Validate input
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+res.status(400).json({ message: 'Please provide all required fields' });
+return;
     }
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+res.status(400).json({ message: 'User already exists' });
+return;
     }
 
     // Create new user
@@ -39,12 +41,7 @@ export const registerUser = async (req: Request, res: Response) => {
       const token = generateToken((user._id as unknown as string).toString());
 
       // Return user info and token
-      res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token,
-      });
+      res.status(201).json({ user, token });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
     }
@@ -57,13 +54,14 @@ export const registerUser = async (req: Request, res: Response) => {
 // @desc    Login user & get token
 // @route   POST /api/auth/login
 // @access  Public
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide email and password' });
+res.status(400).json({ message: 'Please provide email and password' });
+return;
     }
 
     // Find user by email
@@ -75,12 +73,7 @@ export const loginUser = async (req: Request, res: Response) => {
       const token = generateToken((user._id as unknown as string).toString());
 
       // Return user info and token
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token,
-      });
+      res.status(200).json({ user, token });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }

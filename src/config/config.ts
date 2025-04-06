@@ -13,7 +13,7 @@ const config = {
   MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/ai-teacher',
   
   // JWT configuration
-  JWT_SECRET: process.env.JWT_SECRET || 'default_jwt_secret_change_in_production',
+  JWT_SECRET: process.env.JWT_SECRET || 'fallback_secret',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '30d',
   
   // API Keys
