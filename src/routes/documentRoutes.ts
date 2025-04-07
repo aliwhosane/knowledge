@@ -6,7 +6,8 @@ import {
   deleteDocument,
   processDocumentSummary,
   processDocumentQa,
-  processDocumentQuiz
+  processDocumentQuiz,
+  getDocumentQuiz
 } from '../controllers/documentController';
 import authMiddleware from '../middleware/authMiddleware';
 import fs from 'fs';
@@ -31,6 +32,16 @@ router.get('/', authMiddleware, getUserDocuments);
 router.get('/:id', authMiddleware, async (req, res, next) => {
   try {
     await getSingleDocument(req, res);
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// Get quiz details for a specific document
+router.get('/:id/quiz', authMiddleware, async (req, res, next) => {
+  try {
+    await getDocumentQuiz(req, res);
     return next();
   } catch (error) {
     return next(error);

@@ -287,3 +287,21 @@ export const processDocumentQuiz = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// @desc    Get quiz details for a specific document
+// @route   GET /api/documents/:id/quiz
+// @access  Private
+export const getDocumentQuiz = async (req: Request, res: Response) => {
+  try {
+    const document = await DocumentModel.findOne({ _id: req.params.id, user: (req as any).user._id });
+
+    if (!document || !document.generatedQuiz) {
+      return res.status(404).json({ message: 'Quiz not found for this document' });
+    }
+    console.log(document.generatedQuiz)
+    res.json(document.generatedQuiz);
+  } catch (error) {
+    console.error('Get document quiz error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
